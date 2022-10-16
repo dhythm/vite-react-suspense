@@ -18,7 +18,8 @@ function App() {
       <h1>Vite + React</h1>
       <RenderingNotifier name="outside-Suspense" />
       <Suspense fallback={<p>Loading...</p>}>
-        <DataLoader />
+        <DataLoaderAlpha />
+        <DataLoaderBeta />
       </Suspense>
     </div>
   );
@@ -51,7 +52,7 @@ async function fetchData(): Promise<string> {
   return `Hello, ${(Math.random() * 1000).toFixed(0)}`;
 }
 
-let data: string | undefined;
+// let data: string | undefined;
 // const DataLoader: FC = () => {
 //   if (data === undefined) {
 //     throw fetchData().then((d) => (data = d));
@@ -59,14 +60,33 @@ let data: string | undefined;
 
 //   return <div>Data is {data}</div>;
 // };
-function useData(): string {
-  if (data === undefined) {
-    throw fetchData().then((d) => (data = d));
+const dataMap: Map<string, string> = new Map();
+function useData(cacheKey: string): string {
+  const cachedData = dataMap.get(cacheKey);
+  if (cachedData === undefined) {
+    throw fetchData().then((d) => dataMap.set(cacheKey, d));
   }
-  return data;
+  return cachedData;
 }
-const DataLoader: FC = () => {
-  const data = useData();
+
+const dataMapAlternative: Map<string, unknown> = new Map();
+export function useDataAlternative<T>(
+  cacheKey: string,
+  fetch: () => Promise<T>
+): T {
+  const cachedData = dataMapAlternative.get(cacheKey) as T | undefined;
+  if (cachedData === undefined) {
+    throw fetch().then((d) => dataMapAlternative.set(cacheKey, d));
+  }
+  return cachedData;
+}
+
+const DataLoaderAlpha: FC = () => {
+  const data = useData("alpha");
+  return <div>Data is {data}</div>;
+};
+const DataLoaderBeta: FC = () => {
+  const data = useData("beta");
   return <div>Data is {data}</div>;
 };
 
