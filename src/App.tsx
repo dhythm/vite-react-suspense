@@ -18,13 +18,7 @@ function App() {
       <h1>Vite + React</h1>
       <RenderingNotifier name="outside-Suspense" />
       <Suspense fallback={<p>Loading...</p>}>
-        <SometimesSuspend />
-        <RenderingNotifier name="inside-Suspense" />
-        <div className="card">
-          <button onClick={() => setCount((count) => count + 1)}>
-            count is {count}
-          </button>
-        </div>
+        <DataLoader />
       </Suspense>
     </div>
   );
@@ -50,6 +44,30 @@ const RenderingNotifier: FC<RenderingNotifierProps> = ({ name }) => {
   console.log(`${name} is rendered`);
 
   return null;
+};
+
+async function fetchData(): Promise<string> {
+  await sleep(1000);
+  return `Hello, ${(Math.random() * 1000).toFixed(0)}`;
+}
+
+let data: string | undefined;
+// const DataLoader: FC = () => {
+//   if (data === undefined) {
+//     throw fetchData().then((d) => (data = d));
+//   }
+
+//   return <div>Data is {data}</div>;
+// };
+function useData(): string {
+  if (data === undefined) {
+    throw fetchData().then((d) => (data = d));
+  }
+  return data;
+}
+const DataLoader: FC = () => {
+  const data = useData();
+  return <div>Data is {data}</div>;
 };
 
 export default App;
