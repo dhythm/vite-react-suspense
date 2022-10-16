@@ -1,25 +1,46 @@
 import { FC, Suspense, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
+import { Loadable } from "./Loadable";
+
+// function App() {
+//   const [count, setCount] = useState(0);
+
+//   return (
+//     <div className="App">
+//       <div>
+//         <a href="https://vitejs.dev" target="_blank">
+//           <img src="/vite.svg" className="logo" alt="Vite logo" />
+//         </a>
+//         <a href="https://reactjs.org" target="_blank">
+//           <img src={reactLogo} className="logo react" alt="React logo" />
+//         </a>
+//       </div>
+//       <h1>Vite + React</h1>
+//       <RenderingNotifier name="outside-Suspense" />
+//       <Suspense fallback={<p>Loading...</p>}>
+//         <DataLoaderAlpha />
+//         <DataLoaderBeta />
+//       </Suspense>
+//     </div>
+//   );
+// }
 
 function App() {
-  const [count, setCount] = useState(0);
-
+  const [data1] = useState(() => new Loadable(fetchData()));
+  const [data2] = useState(() => new Loadable(fetchData()));
+  const [data3] = useState(() => new Loadable(fetchData()));
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <RenderingNotifier name="outside-Suspense" />
+    <div className="text-center">
+      <h1 className="text-2xl">React App!</h1>
       <Suspense fallback={<p>Loading...</p>}>
-        <DataLoaderAlpha />
-        <DataLoaderBeta />
+        <DataLoaderGamma data={data1} />
+      </Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
+        <DataLoaderGamma data={data2} />
+      </Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
+        <DataLoaderGamma data={data3} />
       </Suspense>
     </div>
   );
@@ -48,7 +69,7 @@ const RenderingNotifier: FC<RenderingNotifierProps> = ({ name }) => {
 };
 
 async function fetchData(): Promise<string> {
-  await sleep(1000);
+  await sleep(Math.floor(Math.random() * 1000));
   return `Hello, ${(Math.random() * 1000).toFixed(0)}`;
 }
 
@@ -88,6 +109,14 @@ const DataLoaderAlpha: FC = () => {
 const DataLoaderBeta: FC = () => {
   const data = useData("beta");
   return <div>Data is {data}</div>;
+};
+const DataLoaderGamma: FC<{ data: Loadable<string> }> = ({ data }) => {
+  const value = data.getOrThrow();
+  return (
+    <div>
+      <div>Data is {value}</div>
+    </div>
+  );
 };
 
 export default App;
